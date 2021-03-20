@@ -12,6 +12,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Chater.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace Chater
@@ -28,6 +32,12 @@ namespace Chater
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+            
+            RepositorySettings.Injection(ref services);
+            JwtSettings.JwtImpelent(ref services, Configuration);
+            
+            
             services.AddSingleton<IMongoClient, MongoClient>(s =>
             {
                 var url = s.GetRequiredService<IConfiguration>()["CONNECTION_STRING"];

@@ -6,12 +6,16 @@ namespace Chater.Models
 {
     public class User
     {
-        [BsonRepresentation(BsonType.String)]
-        public Guid UserId { get; set; }
+        public ObjectId Id { get; set; }
         
         public string Username { get; set; }
         
+        public string Name { get; set; }
+
+        public string Surname { get; set; }
+
         public string Password { get; set; }
+        
         
         public string Token { get; set; }
          

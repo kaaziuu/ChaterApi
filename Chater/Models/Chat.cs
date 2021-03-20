@@ -8,9 +8,7 @@ namespace Chater.Models
 {
     public class Chat
     {
-        [BsonRepresentation(BsonType.String)]
-        [BsonElement("chadId")]
-        public Guid ChaiId { get; set; }
+        public Guid Id { get; set; }
         
         [BsonExtraElements]
         public IEnumerable<User> Users { get; set; }

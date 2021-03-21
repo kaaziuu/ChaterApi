@@ -11,14 +11,15 @@ namespace Chater.Repository.Abstract
     { 
         Task<IEnumerable<User>> GetUsersAsync();
 
-        Task<User> GetUserAsync(ObjectId id);
+        Task<User> GetUserAsync(string id);
 
         Task CreateUserAsync(User user);
 
         Task UpdateUserAsync(User user);
 
-        Task DeleteUserAsync(ObjectId id);
+        Task DeleteUserAsync(string id);
 
-        Task<bool> UserExist(string userName);
+        Task<User> GetUserByUsernameAsync(string username);
+
     }
 }

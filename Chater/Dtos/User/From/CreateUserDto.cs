@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Chater.Dtos.User
+namespace Chater.Dtos.User.From
 {
-    public class CreateUserDto
+    public record CreateUserDto
     {
         [Required]
         public string Username { get; set; }

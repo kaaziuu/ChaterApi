@@ -1,11 +1,11 @@
 ﻿using System;
 using MongoDB.Bson;
 
-namespace Chater.Dtos.User
+namespace Chater.Dtos.User.Response
 {
-    public class UserDto
+    public record UserDto
     {
-        public ObjectId Id { get; set; }
+        public string Id { get; set; }
         
         public string Username { get; set; }
         

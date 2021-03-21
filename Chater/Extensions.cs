@@ -1,5 +1,5 @@
 ﻿using System;
-using Chater.Dtos.User;
+using Chater.Dtos.User.Response;
 using Chater.Models;
 
 namespace Chater

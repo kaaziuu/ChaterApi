@@ -26,7 +26,7 @@ namespace Chater.Repository.Contrete
             return await _collection.Find(new BsonDocument()).ToListAsync();
         }
 
-        public async Task<User> GetUserAsync(ObjectId id)
+        public async Task<User> GetUserAsync(string id)
         {
             var filter = _filterDefinitionBuilder.Eq(u => u.Id, id);
             return await _collection.Find(filter).SingleOrDefaultAsync();
@@ -43,19 +43,16 @@ namespace Chater.Repository.Contrete
             await _collection.ReplaceOneAsync(filter, user);
         }
 
-        public async Task DeleteUserAsync(ObjectId id)
+        public async Task DeleteUserAsync(string id)
         {
             var filter = _filterDefinitionBuilder.Eq(user => user.Id, id);
             await _collection.DeleteOneAsync(filter);
         }
 
-        public async Task<bool> UserExist(string userName)
+        public async Task<User> GetUserByUsernameAsync(string username)
         {
-            var filter = _filterDefinitionBuilder.Eq(user => user.Username, userName);
-            var result = await _collection.Find(filter).SingleOrDefaultAsync();
-            if (result is null)
-                return false;
-            return true;
+            var user = ( await _collection.Find(x => x.Username == username).FirstOrDefaultAsync());
+            return user;
         }
     }
 }

@@ -8,9 +8,16 @@ namespace Chater.Models
 {
     public class Chat
     {
-        public Guid Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         
         [BsonExtraElements]
+        public IEnumerable<Message> Messages { get; set; }
+        
+        [BsonElement]
         public IEnumerable<User> Users { get; set; }
+        
+        
     }
 }

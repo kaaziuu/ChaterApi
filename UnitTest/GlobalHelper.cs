@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using Chater.Models;
 
 namespace UnitTest
@@ -12,8 +13,8 @@ namespace UnitTest
             return new UserToRoom()
             {
                 Roles = (roles != -1) ? roles : _random.Next(UserToRoom.Owner, UserToRoom.SimpleUser),
-                Room = room,
-                User = user
+                Room = room.Id,
+                User = user.Id
             };
         }
         
@@ -38,6 +39,15 @@ namespace UnitTest
                 Surname = new Guid().ToString(),
                 Username = new Guid().ToString()
             };
+        }
+
+        public static ClaimsPrincipal FakeAuthenticationUser()
+        {
+            return new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
+                new Claim(ClaimTypes.NameIdentifier, "admin"),
+                new Claim(ClaimTypes.Name, "admin")
+                // other required and custom claims
+            },"TestAuthentication"));
         }
     }
 }

@@ -13,11 +13,11 @@ namespace Chater.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         
-        [BsonExtraElements]
-        public IEnumerable<Message> Messages { get; set; }
+        [BsonElement]
+        public ICollection<Message> Messages { get; set; }
         
         [BsonElement]
-        public IEnumerable<UserDto> Users { get; set; }
+        public ICollection<UserDto> Users { get; set; }
         
         
     }

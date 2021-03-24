@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -9,6 +10,7 @@ using Chater.Controllers;
 using Chater.Dtos.Room.From;
 using Chater.Dtos.Room.Response;
 using Chater.Dtos.User.Response;
+using Chater.Extensions;
 using Chater.Models;
 using Chater.Repository.Abstract;
 using Chater.Service.Abstract;
@@ -50,12 +52,9 @@ namespace UnitTest
                 
             };
             
+
             ClaimsIdentity claimsIdentity = new ClaimsIdentity();
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim(ClaimTypes.NameIdentifier, "SomeValueHere"),
-                new Claim(ClaimTypes.Name, "gunnar@somecompany.com")
-                // other required and custom claims
-            },"TestAuthentication"));
+            var user = GlobalHelper.FakeAuthenticationUser();
 
             _roomService.Setup(
                 s => s.CreateRoomAsync(It.IsAny<CreateUpdateRoomDto>(), It.IsAny<User>())
@@ -91,7 +90,7 @@ namespace UnitTest
             RoomAction roomAction = new()
             {
                 IsSuccessfully = true,
-                Room = new Room()
+                Room = new RoomDto()
                 {
                     Name = createForm.Name,
                     Id = new Guid().ToString()
@@ -100,11 +99,8 @@ namespace UnitTest
                 
             };
             ClaimsIdentity claimsIdentity = new ClaimsIdentity();
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim(ClaimTypes.NameIdentifier, "SomeValueHere"),
-                new Claim(ClaimTypes.Name, "gunnar@somecompany.com")
-                // other required and custom claims
-            },"TestAuthentication"));
+            var user = GlobalHelper.FakeAuthenticationUser();
+
             
             _roomService.Setup(s => s.CreateRoomAsync(It.IsAny<CreateUpdateRoomDto>(), It.IsAny<User>()))
                 .ReturnsAsync(roomAction);
@@ -141,16 +137,28 @@ namespace UnitTest
             GlobalHelper.AssignUserToRoom(exitingUsers[1], existingRoom[0]);
 
             ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+            var user = GlobalHelper.FakeAuthenticationUser();
+
+            ICollection<RoomDto> returnedRoomDtos = new List<RoomDto>()
+            {
+                existingRoom[0].asDto(),
+                existingRoom[2].asDto()
+            };
 
             _identityService.Setup(_identityService => _identityService.GetCurrentUserAsync(claimsIdentity))
                 .ReturnsAsync(exitingUsers[0]);
+            _userService.Setup(service => service.GetUserRoomsAsync(It.IsAny<User>())).ReturnsAsync(returnedRoomDtos);
+            
             var controller = new RoomController(_identityService.Object, _userService.Object, _roomService.Object);
-
+            controller.ControllerContext = new ControllerContext();  
+            controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
             
             // Act
             var result = await controller.GetRoomsAsync();
             // Assert
-            IEnumerable<RoomDto> objects = result.Value;
+
+            IEnumerable <RoomDto> objects = (result.Result as OkObjectResult).Value as IEnumerable<RoomDto>;
+
             objects.Should().OnlyContain(
                 room => room.Name == existingRoom[0].Name || room.Name == existingRoom[2].Name
             );

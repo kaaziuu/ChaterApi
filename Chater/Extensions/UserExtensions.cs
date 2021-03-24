@@ -2,9 +2,9 @@
 using Chater.Dtos.User.Response;
 using Chater.Models;
 
-namespace Chater
+namespace Chater.Extensions
 {
-    public static class Extensions
+    public static class UserExtensions
     {
         public static UserDto AsDto( this User  user)
         {

@@ -9,8 +9,6 @@ namespace Chater.Dtos.Room.Response
         
         public string Name { get; set; }
         
-        public IEnumerable<UserToRoom> Users { get; set; }
-        
-        public IEnumerable<Chat> Chats { get; set; }
+        public IEnumerable<string> Chats { get; set; }
     }
 }

@@ -18,14 +18,14 @@ namespace Chater.Repository.Contrete
         
         public async Task<ICollection<UserToRoom>> GetUserRoomAsync(User user)
         {
-            var filter = _filterDefinitionBuilder.Eq(utr => utr.User.Id, user.Id);
+            var filter = _filterDefinitionBuilder.Eq(utr => utr.User, user.Id);
             return await _collection.Find(filter).ToListAsync();
 
         }
 
         public async Task<bool> UserIsOnRoomAsync(User user, Room room)
         {
-            var filter = _filterDefinitionBuilder.Where(repo => repo.Room.Id == room.Id && repo.User.Id == user.Id);
+            var filter = _filterDefinitionBuilder.Where(repo => repo.Room == room.Id && repo.User == user.Id);
             var result = await _collection.Find(filter).FirstOrDefaultAsync();
             if (result is not null)
                 return true;

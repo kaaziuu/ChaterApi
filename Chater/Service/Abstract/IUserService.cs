@@ -8,6 +8,6 @@ namespace Chater.Service.Abstract
 {
     public interface IUserService
     {
-        Task<ICollection<Room>> GetUserRoomsAsync(User user);
+        Task<ICollection<RoomDto>> GetUserRoomsAsync(User user);
     }
 }

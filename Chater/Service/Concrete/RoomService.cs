@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Chater.Dtos.Room.From;
 using Chater.Dtos.Room.Response;
+using Chater.Extensions;
 using Chater.Models;
 using Chater.Repository.Abstract;
 using Chater.Service.Abstract;
@@ -38,19 +39,21 @@ namespace Chater.Service.Concrete
                 Chats = null
             };
 
-            UserToRoom userToRoom = new()
-            {
-                Room = newRoom,
-                Roles = UserToRoom.Owner,
-                User = user
-            };
+            
 
             await _roomRepository.CreateRoomAsync(newRoom);
+            UserToRoom userToRoom = new()
+            {
+                Room = newRoom.Id,
+                Roles = UserToRoom.Owner,
+                User = user.Id
+            };
+            
             await _userToRoomRepository.AddUserToRoomAsync(userToRoom);
             return new RoomAction()
             {
                 IsSuccessfully = true,
-                Room = newRoom,
+                Room = newRoom.asDto(),
                 Error = null
             };
 

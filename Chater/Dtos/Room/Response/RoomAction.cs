@@ -7,6 +7,6 @@ namespace Chater.Dtos.Room.Response
         public bool IsSuccessfully { get; set; }
         public string Error { get; set; }
         
-        public Models.Room Room { get; set; }
+        public RoomDto Room { get; set; }
     }
 }

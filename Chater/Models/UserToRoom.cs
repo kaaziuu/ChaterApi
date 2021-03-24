@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Chater.Models
@@ -10,9 +12,12 @@ namespace Chater.Models
         public const int Administration = 1;
         public const int SimpleUser = 2;
         
-        public User User { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+        public string User { get; set; }
         
-        public Room Room { get; set; }
+        public string Room { get; set; }
         
         public int Roles { get; set; }
         

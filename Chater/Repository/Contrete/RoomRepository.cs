@@ -31,7 +31,7 @@ namespace Chater.Repository.Contrete
 
         public async Task CreateRoomAsync(Room room)
         {
-            _collection.InsertOneAsync(room);
+            await _collection.InsertOneAsync(room);
         }
 
         public async Task UpdateRoomAsync(Room room)

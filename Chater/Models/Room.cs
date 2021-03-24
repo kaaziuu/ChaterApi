@@ -16,7 +16,7 @@ namespace Chater.Models
 
         
         [BsonElement]
-        public IEnumerable<Chat> Chats { get; set; }
+        public ICollection<string> Chats { get; set; }
         
     }
 }

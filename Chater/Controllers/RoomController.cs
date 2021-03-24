@@ -34,7 +34,10 @@ namespace Chater.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RoomDto>>> GetRoomsAsync()
         {
-            throw new System.NotImplementedException();
+            User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
+            IEnumerable<RoomDto> rooms = await _userService.GetUserRoomsAsync(user);
+
+            return Ok(rooms);
         }
 
         [HttpGet]
@@ -77,14 +80,14 @@ namespace Chater.Controllers
         
         [HttpPost]
         [Route("{id}/user")]
-        public async Task<ActionResult<RoomAction>> AddUserToRoomAsync(string id, UserActionAtRoomDto user)
+        public async Task<ActionResult<RoomAction>> AddUserToRoomAsync(string id, AddRemoverFromRoom user)
         {
             throw new System.NotImplementedException();
         }
 
         [HttpDelete]
         [Route("{id}/user")]
-        public async Task<ActionResult<RoomAction>> RemoveUserFromRoomAsync(string id, UserActionAtRoomDto user)
+        public async Task<ActionResult<RoomAction>> RemoveUserFromRoomAsync(string id, AddRemoverFromRoom user)
         {
             throw new System.NotImplementedException();
         }

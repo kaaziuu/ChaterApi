@@ -8,6 +8,6 @@ namespace Chater.Service.Abstract
     {
         public Task<string> AuthenticateAsync(string username, string password);
 
-        Task<User> GetCurrentUserAsync(string username);
+        Task<User> GetCurrentUserAsync(ClaimsIdentity claimsIdentity);
     }
 }

@@ -10,10 +10,8 @@ namespace Chater.Models
         public const int Administration = 1;
         public const int SimpleUser = 2;
         
-        [BsonExtraElements]
         public User User { get; set; }
         
-        [BsonExtraElements]
         public Room Room { get; set; }
         
         public int Roles { get; set; }

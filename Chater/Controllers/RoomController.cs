@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Chater.Dtos.Room.From;
 using Chater.Dtos.Room.Response;
 using Chater.Dtos.User.Response;
+using Chater.Models;
 using Chater.Service.Abstract;
+using Chater.Settings;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
@@ -14,7 +19,7 @@ namespace Chater.Controllers
     [ApiController]
     [Authorize]
     [Route("room")]
-    public class RoomController
+    public class RoomController : ControllerBase
     {
         private readonly IIdentityService _identityService;
         private readonly IUserService _userService;
@@ -41,9 +46,17 @@ namespace Chater.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<RoomDto>> CreateRoomAsync(CreateUpdateRoomDto request)
+        public async Task<ActionResult<RoomAction>> CreateRoomAsync(CreateUpdateRoomDto request)
         {
-            throw new System.NotImplementedException();
+            User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
+            var result = await _roomService.CreateRoomAsync(request, user);
+            if (!result.IsSuccessfully )
+            {
+                return this.BadRequest(result);
+            }
+
+            return Ok(result);
+
         }
 
 

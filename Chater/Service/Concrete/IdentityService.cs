@@ -43,7 +43,8 @@ namespace Chater.Service.Concrete
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, username)
+                    new Claim(ClaimTypes.Name, username),
+                    new Claim(ClaimTypes.Surname, username)
                 }),
                 Expires = DateTime.UtcNow.AddHours(5),
                 SigningCredentials = new SigningCredentials(
@@ -56,8 +57,9 @@ namespace Chater.Service.Concrete
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<User> GetCurrentUserAsync(string username)
+        public async Task<User> GetCurrentUserAsync(ClaimsIdentity claimsIdentity)
         {
+            var username = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
             return await _userRepository.GetUserByUsernameAsync(username);
         }
     }

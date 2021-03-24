@@ -2,54 +2,52 @@
 using System.Threading.Tasks;
 using Chater.Models;
 using Chater.Repository.Abstract;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Chater.Repository.Contrete
 {
     public class RoomRepository:BaseRepository, IRoomRepository
     {
+        
+        private readonly IMongoCollection<Room> _collection;
+        private readonly FilterDefinitionBuilder<Room> _filterDefinitionBuilder = Builders<Room>.Filter;
         public RoomRepository(IMongoClient mongoClient) : base(mongoClient)
         {
+            _collection = Database.GetCollection<Room>(nameof(Room));
         }
 
-        public Task<Room> GetUserRoomsAsync(string room)
+        public async Task<Room> GetRoomAsync(string id)
         {
-            throw new System.NotImplementedException();
+            var filter = _filterDefinitionBuilder.Eq(r => r.Id, id);
+            return await _collection.Find(filter).SingleOrDefaultAsync();
         }
 
-        public Task<Room> GetRoomAsync(string id)
+        public async Task<Room> GetRoomByNameAsync(string name)
         {
-            throw new System.NotImplementedException();
+            var filter = _filterDefinitionBuilder.Eq(r => r.Name, name);
+            return await _collection.Find(filter).SingleOrDefaultAsync();
         }
 
-        public Task<Room> GetRoomByNameAsync(string name)
+        public async Task CreateRoomAsync(Room room)
         {
-            throw new System.NotImplementedException();
+            _collection.InsertOneAsync(room);
         }
 
-        public Task CreateRoomAsync(Room room)
+        public async Task UpdateRoomAsync(Room room)
         {
-            throw new System.NotImplementedException();
+            var filter = _filterDefinitionBuilder.Eq(r => r.Id, room.Id);
+            await _collection.ReplaceOneAsync(filter, room);
         }
 
-        public Task UpdateRoomAsync(Room room)
+        public async Task DeleteRoomAsync(Room room)
         {
-            throw new System.NotImplementedException();
+            var filter = _filterDefinitionBuilder.Eq(r => r.Id, room.Id);
+            await _collection.DeleteOneAsync(filter);
         }
 
-        public Task DeleteRoomAsync(Room room)
-        {
-            throw new System.NotImplementedException();
-        }
 
-        public Task DeleteUserAsync(User user)
-        {
-            throw new System.NotImplementedException();
-        }
 
-        public Task<IEnumerable<Room>> GetUserRoomsAsync(User user)
-        {
-            throw new System.NotImplementedException();
-        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using Chater.Dtos.User.Response;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -16,7 +17,7 @@ namespace Chater.Models
         public IEnumerable<Message> Messages { get; set; }
         
         [BsonElement]
-        public IEnumerable<User> Users { get; set; }
+        public IEnumerable<UserDto> Users { get; set; }
         
         
     }

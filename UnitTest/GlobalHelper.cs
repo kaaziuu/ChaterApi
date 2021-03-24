@@ -22,7 +22,6 @@ namespace UnitTest
             return new Room()
             {
                 Chats = null,
-                HasPassword = false,
                 Id = new Guid().ToString(),
                 Name = new Guid().ToString(),
                 Password = new Guid().ToString()

@@ -23,10 +23,23 @@ namespace Chater.Repository.Contrete
 
         }
 
+        public async Task<bool> UserIsOnRoomAsync(User user, Room room)
+        {
+            var filter = _filterDefinitionBuilder.Where(repo => repo.Room.Id == room.Id && repo.User.Id == user.Id);
+            var result = await _collection.Find(filter).FirstOrDefaultAsync();
+            if (result is not null)
+                return true;
+            return false;
+        }
+
         public Task DeleteUserFromRoomAsync(User user, Room room)
         {
             throw new System.NotImplementedException();
         }
 
+        public async Task AddUserToRoomAsync(UserToRoom userToRoom)
+        {
+            await _collection.InsertOneAsync(userToRoom);
+        }
     }
 }

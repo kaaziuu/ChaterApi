@@ -14,7 +14,6 @@ namespace Chater.Models
         
         public string Password { get; set; }
 
-        public bool HasPassword { get; set; }
         
         [BsonElement]
         public IEnumerable<Chat> Chats { get; set; }

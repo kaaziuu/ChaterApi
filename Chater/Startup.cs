@@ -34,7 +34,7 @@ namespace Chater
         {
             BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
             
-            RepositorySettings.Injection(ref services);
+            InjectionSettings.Injection(ref services);
             JwtSettings.JwtImplement(services, Configuration);
             
             services.AddSingleton<IMongoClient, MongoClient>(s =>
@@ -42,7 +42,7 @@ namespace Chater
                 var url = s.GetRequiredService<IConfiguration>()["CONNECTION_STRING"];
                 return new MongoClient(url);
             });
-                services.AddControllers();
+            services.AddControllers();
 
             services.AddSwaggerGen(c =>
             {

@@ -19,6 +19,7 @@ namespace Chater.Service.Concrete
             _userToRoomRepository = userToRoomRepository;
             _roomRepository = roomRepository;
         }
+        
         public async Task<ICollection<RoomDto>> GetUserRoomsAsync(User user)
         {
             ICollection<UserToRoom> userToRooms = await _userToRoomRepository.GetUserRoomAsync(user);

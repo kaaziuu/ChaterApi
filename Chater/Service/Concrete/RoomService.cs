@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Chater.Dtos.Room.From;
 using Chater.Dtos.Room.Response;
+using Chater.Exception;
 using Chater.Extensions;
 using Chater.Models;
 using Chater.Repository.Abstract;
 using Chater.Service.Abstract;
+using Chater.Service.Abstract.HelperService;
 
 namespace Chater.Service.Concrete
 {
@@ -13,24 +16,20 @@ namespace Chater.Service.Concrete
     {
         private readonly IRoomRepository _roomRepository;
         private readonly IUserToRoomRepository _userToRoomRepository;
+        private readonly IRoomServiceHelper _roomServiceHelper;
 
-        public RoomService(IRoomRepository roomRepository, IUserToRoomRepository userToRoomRepository)
+        public RoomService(IRoomRepository roomRepository, IUserToRoomRepository userToRoomRepository, IRoomServiceHelper roomServiceHelper)
         {
             _roomRepository = roomRepository;
             _userToRoomRepository = userToRoomRepository;
+            _roomServiceHelper = roomServiceHelper;
         }
 
         public async Task<RoomAction> CreateRoomAsync(CreateUpdateRoomDto createRoom, User user)
         {
-            var existRoom = await _roomRepository.GetRoomByNameAsync(createRoom.Name);
-            if (existRoom is not null)
+            if (await _roomServiceHelper.RoomIsExistAsync(createRoom.Name))
             {
-                return new RoomAction()
-                {
-                    Error = "Room with this name exist",
-                    IsSuccessfully = false,
-                    Room = null
-                };
+                throw new RoomWithThisNameExist("Room with this name exist");
             }
             Room newRoom = new()
             {
@@ -38,18 +37,8 @@ namespace Chater.Service.Concrete
                 Password = createRoom.Password is null ? null : BCrypt.Net.BCrypt.HashPassword(createRoom.Password),
                 Chats = null
             };
-
-            
-
             await _roomRepository.CreateRoomAsync(newRoom);
-            UserToRoom userToRoom = new()
-            {
-                Room = newRoom.Id,
-                Roles = UserToRoom.Owner,
-                User = user.Id
-            };
-            
-            await _userToRoomRepository.AddUserToRoomAsync(userToRoom);
+            await AddUserToRoomAsync(user, newRoom, UserToRoom.Administration, createRoom.Password);
             return new RoomAction()
             {
                 IsSuccessfully = true,
@@ -60,36 +49,44 @@ namespace Chater.Service.Concrete
         }
         
         
-        public Task<RoomAction> UpdateRoomAsync(CreateUpdateRoomDto updateRoom, User user)
+        public async Task<RoomAction> UpdateRoomAsync(CreateUpdateRoomDto updateRoom, User user)
         {
-            throw new System.NotImplementedException();
-
+            Room room = await _roomRepository.GetRoomByNameAsync(updateRoom.Name);
+            await _roomServiceHelper.VerificationDataBeforeUpdate(updateRoom, user);
+            room.Name = updateRoom.Name;
+            await _roomRepository.UpdateRoomAsync(room); 
+            
+            return new RoomAction()
+            {
+                IsSuccessfully = true,
+                Room = room.asDto()
+            };
         }
 
-        public bool PasswordVerificationAsync(Room room, string password)
+        
+
+        public async Task AddUserToRoomAsync(User user, Room room, int role, string password = null)
         {
-            if (BCrypt.Net.BCrypt.Verify(password, room.Password))
-                return true;
-            return false;
+            await _roomServiceHelper.VerificationDataBeforeAddUserToRoomAsync(user, room, role, password);
+            await CreateUserToRoomAndAddAsync(user.Id, room.Id, role);
         }
 
-        public async Task<bool> PasswordVerificationByRoomNameAsync(string roomName, string password)
-        {
-            var room = await _roomRepository.GetRoomByNameAsync(roomName);
-            if (PasswordVerificationAsync(room, password))
-                return true;
-            return false;
-        }
-
-        public Task<RoomAction> AddUserToRoomAsync(User user, Room room, int roles, string password = null)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<RoomAction> RemoveUserFromRoomAsync(User user, Room room)
+        public Task<RoomAction> RemoveUserFromRoomAsync(User user, Room room, string password = null)
         {
             throw new System.NotImplementedException();
         }
+
+        private async Task CreateUserToRoomAndAddAsync(string userId, string roomId, int role)
+        {
+            UserToRoom userToRoom = new()
+            {
+                User = userId,
+                Room = roomId,
+                Roles = role
+            };
+            await _userToRoomRepository.AddUserToRoomAsync(userToRoom); 
+        }
+        
         
     }
 }

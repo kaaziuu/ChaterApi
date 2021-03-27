@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Chater.Controllers;
 using Chater.Dtos.User.From;
 using Chater.Models;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
-namespace UnitTest
+namespace UnitTest.Controllers
 {
     public class UserControllerTest
     {

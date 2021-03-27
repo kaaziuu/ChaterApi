@@ -1,27 +1,22 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using Chater.Controllers;
 using Chater.Dtos.Room.From;
 using Chater.Dtos.Room.Response;
-using Chater.Dtos.User.Response;
+using Chater.Exception;
 using Chater.Extensions;
 using Chater.Models;
 using Chater.Repository.Abstract;
 using Chater.Service.Abstract;
-using Chater.Service.Concrete;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
-namespace UnitTest
+namespace UnitTest.Controllers
 {
     public class RoomControllerTest
     {
@@ -58,7 +53,7 @@ namespace UnitTest
 
             _roomService.Setup(
                 s => s.CreateRoomAsync(It.IsAny<CreateUpdateRoomDto>(), It.IsAny<User>())
-            ).ReturnsAsync(roomAction);
+            ).Throws(new RoomDoesntExistExceptionException("Room with this name exist"));
             
             var controller = new RoomController(_identityService.Object, _userService.Object, _roomService.Object);
             
@@ -71,6 +66,8 @@ namespace UnitTest
             
             // Assert
             var resultRoomAction = (result.Result as BadRequestObjectResult).Value as RoomAction;
+            
+            
             result.Result.Should().BeOfType<BadRequestObjectResult>();
             resultRoomAction.IsSuccessfully.Should().BeFalse();
             resultRoomAction.Error.Should().Equals("Room with this name exist");

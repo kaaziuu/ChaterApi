@@ -8,7 +8,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace UnitTest
+namespace UnitTest.Services
 {
     public class UserServiceTest
     {

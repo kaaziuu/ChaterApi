@@ -12,13 +12,10 @@ namespace Chater.Service.Abstract
         Task<RoomAction> CreateRoomAsync(CreateUpdateRoomDto createRoom, User user);
 
         Task<RoomAction> UpdateRoomAsync(CreateUpdateRoomDto updateRoom, User user);
+        
+        Task AddUserToRoomAsync(User user, Room room, int role, string password = null);
 
-        bool PasswordVerificationAsync(Room room, string password);
-
-        Task<bool> PasswordVerificationByRoomNameAsync(string roomName, string password);
-
-        Task<RoomAction> AddUserToRoomAsync(User user, Room room, int roles, string password = null);
-
-        Task<RoomAction> RemoveUserFromRoomAsync(User user, Room room);
+        Task<RoomAction> RemoveUserFromRoomAsync(User user, Room room, string password = null);
+        
     }
 }

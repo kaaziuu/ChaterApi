@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Chater.Dtos.Room.From;
 using Chater.Dtos.Room.Response;
 using Chater.Dtos.User.Response;
+using Chater.Exception;
 using Chater.Models;
 using Chater.Service.Abstract;
 using Chater.Settings;
@@ -52,12 +53,20 @@ namespace Chater.Controllers
         public async Task<ActionResult<RoomAction>> CreateRoomAsync(CreateUpdateRoomDto request)
         {
             User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
-            var result = await _roomService.CreateRoomAsync(request, user);
-            if (!result.IsSuccessfully )
+            RoomAction result = null;
+            try
             {
-                return this.BadRequest(result);
+                result = await _roomService.CreateRoomAsync(request, user);
+               
             }
-
+            catch(System.Exception e)
+            {
+                return BadRequest(new RoomAction()
+                {
+                    Error = e.Message,
+                    IsSuccessfully = false
+                });
+            }
             return Ok(result);
 
         }
@@ -80,14 +89,14 @@ namespace Chater.Controllers
         
         [HttpPost]
         [Route("{id}/user")]
-        public async Task<ActionResult<RoomAction>> AddUserToRoomAsync(string id, AddRemoverFromRoom user)
+        public async Task<ActionResult<RoomAction>> AddUserToRoomAsync(string id, AddRemoveUserFromRoom user)
         {
             throw new System.NotImplementedException();
         }
 
         [HttpDelete]
         [Route("{id}/user")]
-        public async Task<ActionResult<RoomAction>> RemoveUserFromRoomAsync(string id, AddRemoverFromRoom user)
+        public async Task<ActionResult<RoomAction>> RemoveUserFromRoomAsync(string id, AddRemoveUserFromRoom user)
         {
             throw new System.NotImplementedException();
         }

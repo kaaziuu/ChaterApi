@@ -1,6 +1,6 @@
 ﻿namespace Chater.Dtos.Room.From
 {
-    public class AddRemoverFromRoom
+    public class AddRemoveUserFromRoom
     {
         public string Id { get; set; }
     }

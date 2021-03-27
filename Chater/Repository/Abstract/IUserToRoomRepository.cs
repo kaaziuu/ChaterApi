@@ -13,5 +13,7 @@ namespace Chater.Repository.Abstract
         Task DeleteUserFromRoomAsync(User user, Room room);
 
         Task AddUserToRoomAsync(UserToRoom userToRoom);
+
+        Task<UserToRoom> GetUserToRoomAsync(User user, Room room);
     }
 }

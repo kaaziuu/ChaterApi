@@ -1,32 +1,4 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=050970db_002De921_002D4420_002D9613_002D9a257e6dc929/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="UserAccountTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomServiceTest&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0dff90a8_002D255e_002D4126_002D95d8_002D2eefcc76fd4b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CreateRoom_WithValidData_ReturnsOkAndCreatedRoom #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomControllerTest.CreateRoom_WithValidData_ReturnsOkAndCreatedRoom&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9a89a956_002D8714_002D47ea_002D88ae_002D75202827aa2e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CreateRoom_WithValidData_ReturnsOkAndCreatedRoom #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomControllerTest.CreateRoom_WithValidData_ReturnsOkAndCreatedRoom&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a08b7a5e_002D01aa_002D4d6a_002Da072_002Dc8899fabb301/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from UserAccountTest.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.UserServiceTest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomServiceTest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomControllerTest&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=afd17579_002D8ee1_002D4d8a_002D8225_002Deb8d62f15f9e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CreateRoom_WithValidData_ReturnsOkAndCreatedRoom" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomControllerTest.CreateRoom_WithValidData_ReturnsOkAndCreatedRoom&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomServiceTest.CreatRoom_RoomWithThisNameExist_ReturnsRoomActionWithError&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomServiceTest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.RoomControllerTest.CreateRoom_WithInvalidData_ReturnsBadRequest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::A18D1DB9-F9EE-4342-8B74-A482BD9C63E5::net5.0::UnitTest.UserServiceTest.GetUserRoom_WithExistingRoom_ReturnsICollectionWithUserRoom&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=3edace48_002D5548_002D42ad_002Dbd9b_002Dc9fed241d37c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

@@ -41,5 +41,12 @@ namespace Chater.Repository.Contrete
         {
             await _collection.InsertOneAsync(userToRoom);
         }
+
+        public async Task<UserToRoom> GetUserToRoomAsync(User user, Room room)
+        {
+            var filter = _filterDefinitionBuilder.Where(repo => repo.Room == room.Id && repo.User == user.Id);
+            return  await _collection.Find(filter).FirstOrDefaultAsync();
+
+        }
     }
 }

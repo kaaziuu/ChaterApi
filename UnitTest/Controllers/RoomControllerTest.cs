@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Chater.Controllers;
-using Chater.Dtos.Room.From;
+using Chater.Dtos.Room;
+using Chater.Dtos.Room.Form;
 using Chater.Dtos.Room.Response;
 using Chater.Exception;
 using Chater.Extensions;
 using Chater.Models;
 using Chater.Repository.Abstract;
+using Chater.Repository.Contrete;
 using Chater.Service.Abstract;
+using Chater.Service.Concrete;
+using Chater.Service.Concrete.HelperService;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +27,9 @@ namespace UnitTest.Controllers
         private readonly Mock<IRoomService> _roomService = new();
         private readonly Mock<IUserService> _userService = new();
         private readonly Mock<IIdentityService> _identityService = new();
+        private readonly Mock<IUserToRoomRepository> _userToRoomRepository = new();
         private readonly Mock<IRoomRepository> _roomRepository = new();
+        private readonly Mock<IUserRepository> _userRepository = new();
 
 
         [Fact]
@@ -33,7 +39,7 @@ namespace UnitTest.Controllers
             // Arrange
             var existRoom = GlobalHelper.GenerateRoom();
 
-            CreateUpdateRoomDto createForm = new()
+            CreateRoomForm createForm = new()
             {
                 Name = existRoom.Name,
                 Password = "test"
@@ -52,7 +58,7 @@ namespace UnitTest.Controllers
             var user = GlobalHelper.FakeAuthenticationUser();
 
             _roomService.Setup(
-                s => s.CreateRoomAsync(It.IsAny<CreateUpdateRoomDto>(), It.IsAny<User>())
+                s => s.CreateRoomAsync(It.IsAny<CreateRoomForm>(), It.IsAny<User>())
             ).Throws(new RoomDoesntExistExceptionException("Room with this name exist"));
             
             var controller = new RoomController(_identityService.Object, _userService.Object, _roomService.Object);
@@ -79,7 +85,7 @@ namespace UnitTest.Controllers
         public async Task CreateRoom_WithValidData_ReturnsOkAndCreatedRoom()
         {
             // Arrange
-            CreateUpdateRoomDto createForm = new()
+            CreateRoomForm createForm = new()
             {
                 Name = "pokoj 1",
                 Password = null
@@ -99,7 +105,7 @@ namespace UnitTest.Controllers
             var user = GlobalHelper.FakeAuthenticationUser();
 
             
-            _roomService.Setup(s => s.CreateRoomAsync(It.IsAny<CreateUpdateRoomDto>(), It.IsAny<User>()))
+            _roomService.Setup(s => s.CreateRoomAsync(It.IsAny<CreateRoomForm>(), It.IsAny<User>()))
                 .ReturnsAsync(roomAction);
             
             var owner = GlobalHelper.GenerateExampleUser();
@@ -162,5 +168,265 @@ namespace UnitTest.Controllers
             
 
         }
+
+        [Fact]
+        public async Task UpdateRoom_RoomDoesntExist_ReturnsBadResult()
+        {
+            var room = GlobalHelper.GenerateRoom();
+            var user = GlobalHelper.GenerateExampleUser();
+            _roomRepository.Setup(repo => repo.GetRoomAsync(room.Name)).ReturnsAsync((Room) null);
+            _roomRepository.Setup(repo => repo.GetRoomByNameAsync(It.IsAny<string>())).ReturnsAsync(room);
+            UpdateRoomForm form = new()
+            {
+                Name = "test",
+                NewName = "test2",
+                Password = "name"
+            };
+            room.Password = BCrypt.Net.BCrypt.HashPassword("name");
+            
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+            var userAuth = GlobalHelper.FakeAuthenticationUser();
+            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService =
+                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+            
+            
+            var owner = GlobalHelper.GenerateExampleUser();
+            _identityService.Setup(repo => repo.GetCurrentUserAsync(claimsIdentity)).ReturnsAsync(user);
+
+
+            var controller = new RoomController(_identityService.Object, _userService.Object, roomService);
+            controller.ControllerContext = new ControllerContext();  
+            controller.ControllerContext.HttpContext = new DefaultHttpContext { User = userAuth };
+            
+            // Act
+            var result = await controller.UpdateRoomAsync(It.IsAny<string>() ,form);
+            // Arrange
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+            RoomAction roomAction = (result.Result as BadRequestObjectResult).Value as RoomAction;
+            roomAction.Error.Should().BeSameAs("Room with this name exist");
+            roomAction.IsSuccessfully.Should().BeFalse();
+
+        }
+
+        [Fact]
+        public async Task UpdateRoom_InvalidRole_ReturnsBadResult()
+        {
+            var room = GlobalHelper.GenerateRoom();
+            var user = GlobalHelper.GenerateExampleUser();
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            var utr = new UserToRoom()
+            {
+                Roles = UserToRoom.SimpleUser,
+                User = user.Id,
+                Room = room.Id
+            };
+
+            _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>())).ReturnsAsync(utr);
+            UpdateRoomForm form = new()
+            {
+                Name = "test",
+                NewName = "test2",
+                Password = "name"
+            };
+            room.Password = BCrypt.Net.BCrypt.HashPassword("name");
+            
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+            var userAuth = GlobalHelper.FakeAuthenticationUser();
+            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService =
+                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+            
+            
+            var owner = GlobalHelper.GenerateExampleUser();
+            _identityService.Setup(repo => repo.GetCurrentUserAsync(claimsIdentity)).ReturnsAsync(user);
+
+
+            var controller = new RoomController(_identityService.Object, _userService.Object, roomService);
+            controller.ControllerContext = new ControllerContext();  
+            controller.ControllerContext.HttpContext = new DefaultHttpContext { User = userAuth };
+            
+            // Act
+            var result = await controller.UpdateRoomAsync(It.IsAny<string>() ,form);
+            // Arrange
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+            RoomAction roomAction = (result.Result as BadRequestObjectResult).Value as RoomAction;
+            roomAction.Error.Should().BeSameAs("Invalid role");
+            roomAction.IsSuccessfully.Should().BeFalse();
+        }
+        
+        [Fact]
+        public async Task UpdateRoom_WithValidData_ReturnsOkRequest()
+        {
+            var room = GlobalHelper.GenerateRoom();
+            var user = GlobalHelper.GenerateExampleUser();
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            var utr = new UserToRoom()
+            {
+                Roles = UserToRoom.Administration,
+                User = user.Id,
+                Room = room.Id
+            };
+
+            _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>())).ReturnsAsync(utr);
+            UpdateRoomForm form = new()
+            {
+                Name = "test",
+                NewName = "test2",
+                Password = "name"
+            };
+            room.Password = BCrypt.Net.BCrypt.HashPassword("name");
+            
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+            var userAuth = GlobalHelper.FakeAuthenticationUser();
+            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService =
+                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+            
+            
+            var owner = GlobalHelper.GenerateExampleUser();
+            _identityService.Setup(repo => repo.GetCurrentUserAsync(claimsIdentity)).ReturnsAsync(user);
+
+
+            var controller = new RoomController(_identityService.Object, _userService.Object, roomService);
+            controller.ControllerContext = new ControllerContext();  
+            controller.ControllerContext.HttpContext = new DefaultHttpContext { User = userAuth };
+            
+            // Act
+            var result = await controller.UpdateRoomAsync(It.IsAny<string>() ,form);
+            // Arrange
+            result.Result.Should().BeOfType<OkObjectResult>();
+
+            RoomAction roomAction = (result.Result as OkObjectResult)?.Value as RoomAction;
+            roomAction.Error.Should().BeNullOrEmpty();
+            roomAction.IsSuccessfully.Should().BeTrue();
+
+            
+        }
+
+        [Fact]
+        public async Task AddUserToRoom_InvalidPassword_ReturnsBadRequest()
+        {
+            // Arrange
+            var user = GlobalHelper.GenerateExampleUser();
+            var owner = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            
+            
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper, _userRepository.Object);
+            bool isCatch = false;
+            AddRemoveUserFromRoom form = new()
+            {
+                UserId = user.Id,
+                RoomPassword = "123",
+                Role = UserToRoom.Administration
+            };
+            var controller = new RoomController(_identityService.Object, _userService.Object, roomService);
+            
+            // Act
+            var result = await controller.AddUserToRoomAsync(It.IsAny<string>(), form);
+            
+            // Assert
+            result.Should().BeOfType<ObjectResult>();
+
+
+        }
+
+        [Fact]
+        public async Task AddUserToRoom_InvalidRoles_ReturnsBadRequest()
+        {
+            var user = GlobalHelper.GenerateExampleUser();
+            var owner = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
+            
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            AddRemoveUserFromRoom form = new()
+            {
+                UserId = user.Id,
+                RoomPassword = "test",
+                Role = 5
+            };
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper, _userRepository.Object);
+            var controller = new RoomController(_identityService.Object, _userService.Object, roomService);
+            
+            // Act
+            var result = await controller.AddUserToRoomAsync(It.IsAny<string>(), form);
+            
+            // Assert
+            result.Should().BeOfType<ObjectResult>();
+        }
+
+        [Fact]
+        public async Task AddUserToRoom_UserIsInRoom_ReturnsBadRequest()
+        {
+            // Arrange
+            var user = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            var owner = GlobalHelper.GenerateExampleUser();
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+
+            _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(user, room)).ReturnsAsync(true);
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+
+            AddRemoveUserFromRoom form = new()
+            {
+                UserId = user.Id,
+                RoomPassword = "test"
+            };
+
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
+                _userRepository.Object);
+            var controller = new RoomController(_identityService.Object, _userService.Object, roomService);
+
+            // Act
+            var result = await controller.AddUserToRoomAsync(It.IsAny<string>(), form);
+
+            // Assert
+            result.Should().BeOfType<ObjectResult>();
+        }
+
+        [Fact]
+        public async Task AddUserToRoom_ValidData_Ok()
+        {
+            // Arrange
+            var user = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            var owner = GlobalHelper.GenerateExampleUser();
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+
+
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
+                _userRepository.Object);
+
+            AddRemoveUserFromRoom form = new()
+            {
+                UserId = user.Id,
+                RoomPassword = "test"
+            };
+            var controller = new RoomController(_identityService.Object, _userService.Object, roomService);
+
+            // Act
+            var result = await controller.AddUserToRoomAsync(It.IsAny<string>(), form);
+
+            // Assert
+            result.Should().BeOfType<OkResult>();
+        }
+
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Chater.Dtos.Room.From;
+using Chater.Dtos.Room;
+using Chater.Dtos.Room.Form;
 using Chater.Exception;
 using Chater.Models;
 using Chater.Repository.Abstract;
@@ -133,17 +134,17 @@ namespace UnitTest.Services.HelperService
         }
 
         [Fact]
-        public async Task VerificationDataBeforeUpdate_DoesntExist_ThrowRoomDoesntExist()
+        public async Task VerificationDataBeforeUpdate_RoomWithNewNameExist_ThrowRoomDoesntExist()
         {
             // Arrange
-            CreateUpdateRoomDto updateForm = new()
+            UpdateRoomForm updateForm = new()
             {
                 Name = new Guid().ToString(),
                 Password = "test"
             };
             User user = GlobalHelper.GenerateExampleUser();
-
-            _roomRepository.Setup(repo => repo.GetRoomByNameAsync(updateForm.Name)).ReturnsAsync((Room) null);
+            Room room = GlobalHelper.GenerateRoom();
+            _roomRepository.Setup(repo => repo.GetRoomByNameAsync(It.IsAny<string>())).ReturnsAsync(room);
             var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
 
             // Act
@@ -152,11 +153,11 @@ namespace UnitTest.Services.HelperService
             {
                 await service.VerificationDataBeforeUpdate(updateForm, user);
             }
-            catch (RoomDoesntExistExceptionException e)
+            catch (RoomWithThisNameExist e)
             {
                 // assert
                 isCatch = true;
-                e.Message.Should().Equals("invalid name of room");
+                e.Message.Should().BeSameAs("Room with this name exist");
             }
             isCatch.Should().BeTrue("method doesn't throw RoomDoesntExistExceptionException");
             
@@ -171,13 +172,13 @@ namespace UnitTest.Services.HelperService
             User user = GlobalHelper.GenerateExampleUser();
             var utr= GlobalHelper.AssignUserToRoom(user, room, UserToRoom.SimpleUser);
             
-            CreateUpdateRoomDto updateForm = new()
+            UpdateRoomForm updateForm = new()
             {
                 Name = room.Name,
                 Password = room.Password
             };
             
-            _roomRepository.Setup(repo => repo.GetRoomByNameAsync(updateForm.Name)).ReturnsAsync((Room) room);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync((Room) room);
             _userToRoomService.Setup(repo => repo.GetUserToRoomAsync(user, room)).ReturnsAsync(utr);
             var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
             
@@ -204,13 +205,13 @@ namespace UnitTest.Services.HelperService
             Room room = GlobalHelper.GenerateRoom();
             User user = GlobalHelper.GenerateExampleUser();
             GlobalHelper.AssignUserToRoom(user, room, UserToRoom.SimpleUser);
-            CreateUpdateRoomDto updateForm = new()
+            UpdateRoomForm updateForm = new()
             {
                 Name = room.Name,
                 Password = room.Password
             };
             
-            _roomRepository.Setup(repo => repo.GetRoomByNameAsync(updateForm.Name)).ReturnsAsync((Room) room);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync((Room) room);
             _userToRoomService.Setup(repo => repo.GetUserToRoomAsync(user, room)).ReturnsAsync((UserToRoom) null);
             var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
             

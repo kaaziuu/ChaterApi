@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Chater.Dtos.Room.From
+namespace Chater.Dtos.Room.Form
 {
-    public class CreateUpdateRoomDto
+    public class CreateRoomForm
     {   
         [Required]
         public string Name { get; set; }

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Chater.Dtos.Room.From;
+using Chater.Dtos.Room;
+using Chater.Dtos.Room.Form;
 using Chater.Dtos.Room.Response;
 using Chater.Exception;
 using Chater.Extensions;
@@ -17,15 +18,19 @@ namespace Chater.Service.Concrete
         private readonly IRoomRepository _roomRepository;
         private readonly IUserToRoomRepository _userToRoomRepository;
         private readonly IRoomServiceHelper _roomServiceHelper;
-
-        public RoomService(IRoomRepository roomRepository, IUserToRoomRepository userToRoomRepository, IRoomServiceHelper roomServiceHelper)
+        private readonly IUserRepository _userRepository;
+        public RoomService(IRoomRepository roomRepository,
+            IUserToRoomRepository userToRoomRepository,
+            IRoomServiceHelper roomServiceHelper,
+            IUserRepository userRepository)
         {
             _roomRepository = roomRepository;
             _userToRoomRepository = userToRoomRepository;
             _roomServiceHelper = roomServiceHelper;
+            _userRepository = userRepository;
         }
 
-        public async Task<RoomAction> CreateRoomAsync(CreateUpdateRoomDto createRoom, User user)
+        public async Task<RoomAction> CreateRoomAsync(CreateRoomForm createRoom, User user)
         {
             if (await _roomServiceHelper.RoomIsExistAsync(createRoom.Name))
             {
@@ -49,11 +54,11 @@ namespace Chater.Service.Concrete
         }
         
         
-        public async Task<RoomAction> UpdateRoomAsync(CreateUpdateRoomDto updateRoom, User user)
+        public async Task<RoomAction> UpdateRoomAsync(UpdateRoomForm updateRoom, User user)
         {
-            Room room = await _roomRepository.GetRoomByNameAsync(updateRoom.Name);
+            Room room = await _roomRepository.GetRoomAsync(updateRoom.Id);
             await _roomServiceHelper.VerificationDataBeforeUpdate(updateRoom, user);
-            room.Name = updateRoom.Name;
+            room.Name = updateRoom.NewName;
             await _roomRepository.UpdateRoomAsync(room); 
             
             return new RoomAction()
@@ -63,15 +68,22 @@ namespace Chater.Service.Concrete
             };
         }
 
-        
+        public async Task GetRoomAndAddUserAsync(AddRemoveUserFromRoom form,  string roomId)
+        {
+            Room room = await _roomRepository.GetRoomAsync(roomId);
+            User newUser = await _userRepository.GetUserAsync(form.UserId);
+            await AddUserToRoomAsync(newUser, room, form.Role, form.RoomPassword);
 
-        public async Task AddUserToRoomAsync(User user, Room room, int role, string password = null)
+        }
+
+
+        private async Task AddUserToRoomAsync(User user, Room? room, int role, string password = null)
         {
             await _roomServiceHelper.VerificationDataBeforeAddUserToRoomAsync(user, room, role, password);
             await CreateUserToRoomAndAddAsync(user.Id, room.Id, role);
         }
 
-        public Task<RoomAction> RemoveUserFromRoomAsync(User user, Room room, string password = null)
+        public Task RemoveUserFromRoomAsync(User user, Room room, string password = null)
         {
             throw new System.NotImplementedException();
         }

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Chater.Dtos.Room.From;
+using Chater.Dtos.Room;
+using Chater.Dtos.Room.Form;
 using Chater.Dtos.Room.Response;
 using Chater.Dtos.User.Response;
 using Chater.Exception;
@@ -50,7 +51,7 @@ namespace Chater.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<RoomAction>> CreateRoomAsync(CreateUpdateRoomDto request)
+        public async Task<ActionResult<RoomAction>> CreateRoomAsync(CreateRoomForm request)
         {
             User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
             RoomAction result = null;
@@ -72,10 +73,25 @@ namespace Chater.Controllers
         }
 
 
-        [HttpPut]
-        public async Task<ActionResult> UpdateRoomAsync(CreateUpdateRoomDto request)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<RoomAction>> UpdateRoomAsync(string id,UpdateRoomForm request)
         {
-            throw new System.NotImplementedException();
+            User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
+            try
+            {
+                request.Id = id;
+                var roomAction = await _roomService.UpdateRoomAsync(request, user);
+                return Ok(roomAction);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(new RoomAction()
+                {
+                    Error = e.Message,
+                    IsSuccessfully = false
+                });
+            }
+
         }
         
         
@@ -89,14 +105,22 @@ namespace Chater.Controllers
         
         [HttpPost]
         [Route("{id}/user")]
-        public async Task<ActionResult<RoomAction>> AddUserToRoomAsync(string id, AddRemoveUserFromRoom user)
+        public async Task<ActionResult> AddUserToRoomAsync(string id, AddRemoveUserFromRoom form)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                await _roomService.GetRoomAndAddUserAsync(form, id);
+                return Ok();
+            }
+            catch (System.Exception e)
+            {
+                return Problem(e.Message);
+            }
         }
 
         [HttpDelete]
         [Route("{id}/user")]
-        public async Task<ActionResult<RoomAction>> RemoveUserFromRoomAsync(string id, AddRemoveUserFromRoom user)
+        public async Task<ActionResult> RemoveUserFromRoomAsync(string id, AddRemoveUserFromRoom form)
         {
             throw new System.NotImplementedException();
         }

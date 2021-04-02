@@ -11,18 +11,18 @@ using Chater.Service.Abstract.HelperService;
 
 namespace Chater.Service.Concrete.HelperService
 {
-    public class RoomServiceHelper : IRoomServiceHelper
+    public class HelperService : IHelperService
     {
         private readonly IRoomRepository _roomRepository;
         private readonly IUserToRoomRepository _userToRoomRepository;
 
-        public RoomServiceHelper(IRoomRepository roomRepository, IUserToRoomRepository userToRoomRepository)
+        
+        public HelperService(IRoomRepository roomRepository, IUserToRoomRepository userToRoomRepository)
         {
             _roomRepository = roomRepository;
             _userToRoomRepository = userToRoomRepository;
         }
-
-
+        
         public async Task<bool> VerificationDataBeforeUpdate(UpdateRoomForm updateForm, User user)
         {
             Room room = await _roomRepository.GetRoomByNameAsync(updateForm.Name);
@@ -88,34 +88,7 @@ namespace Chater.Service.Concrete.HelperService
             await VerificationRolesAsync(room, user, UserToRoom.Administration);
             VerificationPassword(room, form.Password);
         }
-
-        private async Task VerificationUserIsNotInRoomAsync(User user, Room room)
-        {
-            if (!(await _userToRoomRepository.UserIsOnRoomAsync(user, room)))
-            {
-                throw new System.Exception("User is not in room");
-            }
-        }
-
-        private void VerificationRole(int role)
-        {
-            List<int> roles = UserToRoom.GetAllRoles<int>(typeof(UserToRoom));
-            if (!roles.Contains(role))
-            {
-                throw new System.Exception("Invalid Role");
-            }
-        }
-
-
-
-        private void VerificationRoomExisting(Room room)
-        {
-            if (room == null)
-            {
-                throw new RoomDoesntExistExceptionException("");
-            }
-        }
-
+        
         private async Task VerificationRolesAsync(Room room, User user, int requireRole)
         {
             int? userRoles = await GetUserRoleInRoomAsync(room, user);
@@ -124,7 +97,7 @@ namespace Chater.Service.Concrete.HelperService
                 throw new InvalidRoleException("Invalid role");
             }
         }
-
+        
         private bool CheckRoles(int? userRoles, int requireRoles)
         {
             if (userRoles is null)
@@ -133,5 +106,41 @@ namespace Chater.Service.Concrete.HelperService
                 return true;
             return false;
         }
+        
+        private void VerificationRole(int role)
+        {
+            List<int> roles = UserToRoom.GetAllRoles<int>(typeof(UserToRoom));
+            if (!roles.Contains(role))
+            {
+                throw new InvalidRoleException("Invalid Role");
+            }
+        }
+        
+
+        public async Task VerificationDataBeforeSendMessage(User user, Room? room)
+        {
+            VerificationRoomExisting(room);
+            await VerificationUserIsNotInRoomAsync(user, room);
+        }
+
+        private async Task VerificationUserIsNotInRoomAsync(User user, Room room)
+        {
+            if (!(await _userToRoomRepository.UserIsOnRoomAsync(user, room)))
+            {
+                throw new UserIsNotInRoomException("User is not in room");
+            }
+        }
+
+        
+
+        private void VerificationRoomExisting(Room room)
+        {
+            if (room == null)
+            {
+                throw new RoomDoesntExistExceptionException("Room doesnt exist");
+            }
+        }
+
+        
     }
 }

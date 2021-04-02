@@ -23,7 +23,7 @@ namespace UnitTest.Services.HelperService
             // Arrange
             var room = GlobalHelper.GenerateRoom();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
             bool isCatch = false;
             // Act
             try
@@ -47,7 +47,7 @@ namespace UnitTest.Services.HelperService
             // Arrange
             var room = GlobalHelper.GenerateRoom();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
             
             // Act
             var result = service.VerificationPassword(room, "test");
@@ -61,7 +61,7 @@ namespace UnitTest.Services.HelperService
             var room = GlobalHelper.GenerateRoom();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
             _roomRepository.Setup(repo => repo.GetRoomByNameAsync(room.Name)).ReturnsAsync(room);
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
             bool isCatch = false;
             // Act
             try
@@ -87,7 +87,7 @@ namespace UnitTest.Services.HelperService
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
             _roomRepository.Setup(repo => repo.GetRoomByNameAsync(room.Name)).ReturnsAsync(room);
 
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
             
             // Act
             var result = await service.PasswordVerificationByRoomNameAsync(room.Name, "test");
@@ -107,7 +107,7 @@ namespace UnitTest.Services.HelperService
             };
 
             _roomRepository.Setup(repo => repo.GetRoomByNameAsync(existRoom.Name)).ReturnsAsync(existRoom);
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
 
             // Act
             var result = await service.RoomIsExistAsync(existRoom.Name);
@@ -124,7 +124,7 @@ namespace UnitTest.Services.HelperService
             string exampleName = "Test";
             
             _roomRepository.Setup(repo => repo.GetRoomByNameAsync(exampleName)).ReturnsAsync((Room)null);
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
 
             // Act
             var result = await service.RoomIsExistAsync(exampleName);
@@ -145,7 +145,7 @@ namespace UnitTest.Services.HelperService
             User user = GlobalHelper.GenerateExampleUser();
             Room room = GlobalHelper.GenerateRoom();
             _roomRepository.Setup(repo => repo.GetRoomByNameAsync(It.IsAny<string>())).ReturnsAsync(room);
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
 
             // Act
             bool isCatch = false;
@@ -180,7 +180,7 @@ namespace UnitTest.Services.HelperService
             
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync((Room) room);
             _userToRoomService.Setup(repo => repo.GetUserToRoomAsync(user, room)).ReturnsAsync(utr);
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
             
             // Act
             bool isCatch = false;
@@ -213,7 +213,7 @@ namespace UnitTest.Services.HelperService
             
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync((Room) room);
             _userToRoomService.Setup(repo => repo.GetUserToRoomAsync(user, room)).ReturnsAsync((UserToRoom) null);
-            var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
+            var service = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomService.Object);
             
             // Act
             bool isCatch = false;

@@ -13,6 +13,7 @@ using Chater.Service.Abstract.HelperService;
 using Chater.Service.Concrete;
 using Chater.Service.Concrete.HelperService;
 using FluentAssertions;
+using Microsoft.AspNetCore.Identity;
 using Moq;
 using Xunit;
 
@@ -22,7 +23,7 @@ namespace UnitTest.Services
     {
         private readonly Mock<IUserToRoomRepository> _userToRoomRepository = new();
         private readonly Mock<IRoomRepository> _roomRepository = new();
-        private readonly Mock<IRoomServiceHelper> _roomServiceHelper = new();
+        private readonly Mock<IHelperService> _roomServiceHelper = new();
         private readonly Mock<IUserRepository> _userRepository = new();
         
         [Fact]
@@ -34,9 +35,9 @@ namespace UnitTest.Services
             var owner = GlobalHelper.GenerateExampleUser();
             existRoom.Name = room.Name;
             _roomRepository.Setup(repo => repo.GetRoomByNameAsync(room.Name)).ReturnsAsync(existRoom);
-            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helperService = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
 
-            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helperService, _userRepository.Object);
             CreateRoomForm newRoom = new()
             {
                 Name = room.Name,
@@ -87,10 +88,10 @@ namespace UnitTest.Services
             var room = GlobalHelper.GenerateRoom();
             _roomRepository.Setup(repo => repo.GetRoomByNameAsync(It.IsAny<string>())).ReturnsAsync(room);
 
-            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helperService = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             var owner = GlobalHelper.GenerateExampleUser();
             
-            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helperService, _userRepository.Object);
             UpdateRoomForm updateRoom = new()
             {
                 Name = new Guid().ToString(),
@@ -98,19 +99,9 @@ namespace UnitTest.Services
                 NewName = new Guid().ToString()
             };
             // Act
-            bool isCatch = false;
-            try
-            {
-                var result = await service.UpdateRoomAsync(updateRoom, owner);
-            }
-            catch (RoomWithThisNameExist e)
-            {
-                isCatch = true;
-                // Assert
-                e.Message.Should().Be("Room with this name exist");
-            }
-
-            isCatch.Should().BeTrue("service doesnt throw exceptions");
+            Func<Task> action = async () => await service.UpdateRoomAsync(updateRoom, owner);
+            // Assert
+            action.Should().ThrowAsync<RoomWithThisNameExist>().WithMessage("Room with this name exist");
         }
 
         [Fact]
@@ -123,10 +114,10 @@ namespace UnitTest.Services
             var user = GlobalHelper.GenerateExampleUser();
             var utr = GlobalHelper.AssignUserToRoom(user, room, UserToRoom.SimpleUser);
             
-            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helperService = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(user, room)).ReturnsAsync(utr);
 
-            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helperService, _userRepository.Object);
             UpdateRoomForm updateRoom = new()
             {
                 Name = new Guid().ToString(),
@@ -134,19 +125,10 @@ namespace UnitTest.Services
                 NewName = new Guid().ToString()
             };
             // Act
-            bool isCatch = false;
-            try
-            {
-                var result = await service.UpdateRoomAsync(updateRoom, user);
-            }
-            catch (InvalidRoleException e)
-            {
-                // Assert
-                isCatch = true;
-                e.Message.Should().Equals("Invalid roles");
-            }
 
-            isCatch.Should().BeTrue("service doesnt throw error");
+            Func <Task> action = async () => await service.UpdateRoomAsync(updateRoom, user);
+            // Assert
+            action.Should().ThrowAsync<InvalidRoleException>();
         }
 
         [Fact]
@@ -161,11 +143,11 @@ namespace UnitTest.Services
 
 
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
-            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helperService = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>())).ReturnsAsync(utr);
 
             
-            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+            var service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helperService, _userRepository.Object);
             UpdateRoomForm updateRoom = new()
             {
                 Name = new Guid().ToString(),
@@ -187,7 +169,7 @@ namespace UnitTest.Services
             var owner = GlobalHelper.GenerateExampleUser();
             var room = GlobalHelper.GenerateRoom();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
 
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
@@ -206,7 +188,7 @@ namespace UnitTest.Services
             Func<Task> action = async () => await service.GetRoomAndAddUserAsync(form,  It.IsAny<string>());
 
             // Assert
-            action.Should().ThrowAsync<InvalidPasswordException>();
+            await action.Should().ThrowAsync<InvalidPasswordException>();
 
         }
 
@@ -222,7 +204,7 @@ namespace UnitTest.Services
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
             
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             AddUserFromRoom form = new()
             {
                 UserId = user.Id,
@@ -234,7 +216,7 @@ namespace UnitTest.Services
             // Act 
             Func<Task> action = async () => await service.GetRoomAndAddUserAsync(form,  It.IsAny<string>());
             // Assert
-            action.Should().ThrowAsync<InvalidRoleException>();
+            await action.Should().ThrowAsync<InvalidRoleException>();
 
         }
 
@@ -246,7 +228,7 @@ namespace UnitTest.Services
             var room = GlobalHelper.GenerateRoom();
             var owner = GlobalHelper.GenerateExampleUser();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(user, room)).ReturnsAsync(true);
             
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
@@ -287,7 +269,7 @@ namespace UnitTest.Services
             var room = GlobalHelper.GenerateRoom();
             var owner = GlobalHelper.GenerateExampleUser();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
 
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
@@ -304,6 +286,7 @@ namespace UnitTest.Services
 
             Func<Task> action = async () => await service.GetRoomAndAddUserAsync(form, It.IsAny<string>());
             // Assert 
+            await action.Should().NotThrowAsync();
         }
 
         [Fact]
@@ -329,7 +312,7 @@ namespace UnitTest.Services
                 .ReturnsAsync(utr);
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
                 _userRepository.Object);
             // act
@@ -337,7 +320,7 @@ namespace UnitTest.Services
             Func<Task> action =  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
             // assert
 
-            action.Should().Throw<Exception>();
+            await action.Should().ThrowAsync<Exception>();
         }
 
         [Fact]
@@ -365,7 +348,7 @@ namespace UnitTest.Services
 
             
             
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
                 _userRepository.Object);
             // act
@@ -399,13 +382,13 @@ namespace UnitTest.Services
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
 
             
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
                 _userRepository.Object);
             // act
             Func<Task> action =  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
             // Assert
-            action.Should().Throw<InvalidRoleException>().WithMessage("Invalid Role");
+            await action.Should().ThrowAsync<InvalidRoleException>().WithMessage("Invalid Role");
 
 
         }
@@ -433,13 +416,13 @@ namespace UnitTest.Services
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
 
             
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
                 _userRepository.Object);
             // act
             Func<Task> action =  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
             // Assert
-            action.Should().Throw<RoomDoesntExistExceptionException>().WithMessage("Room doesnt exist");
+            await action.Should().ThrowAsync<RoomDoesntExistExceptionException>().WithMessage("Room doesnt exist");
 
         }
         
@@ -466,13 +449,13 @@ namespace UnitTest.Services
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
 
             
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            Chater.Service.Concrete.HelperService.HelperService helper = new Chater.Service.Concrete.HelperService.HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
                 _userRepository.Object);
             // act
             Func<Task> action=  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
             // Assert
-            action.Should().NotThrow();
+            await action.Should().NotThrowAsync();
         }
     }
 }

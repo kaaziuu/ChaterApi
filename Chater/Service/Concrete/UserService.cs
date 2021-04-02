@@ -14,6 +14,8 @@ namespace Chater.Service.Concrete
     {
         private readonly IUserToRoomRepository _userToRoomRepository;
         private readonly IRoomRepository _roomRepository;
+        
+        
         public UserService(IUserToRoomRepository userToRoomRepository, IRoomRepository roomRepository)
         {
             _userToRoomRepository = userToRoomRepository;

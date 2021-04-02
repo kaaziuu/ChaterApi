@@ -186,9 +186,9 @@ namespace UnitTest.Controllers
             
             ClaimsIdentity claimsIdentity = new ClaimsIdentity();
             var userAuth = GlobalHelper.FakeAuthenticationUser();
-            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            HelperService helperService = new HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService =
-                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helperService, _userRepository.Object);
             
             
             var owner = GlobalHelper.GenerateExampleUser();
@@ -233,9 +233,9 @@ namespace UnitTest.Controllers
             
             ClaimsIdentity claimsIdentity = new ClaimsIdentity();
             var userAuth = GlobalHelper.FakeAuthenticationUser();
-            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            HelperService helperService = new HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService =
-                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helperService, _userRepository.Object);
             
             
             var owner = GlobalHelper.GenerateExampleUser();
@@ -279,9 +279,9 @@ namespace UnitTest.Controllers
             
             ClaimsIdentity claimsIdentity = new ClaimsIdentity();
             var userAuth = GlobalHelper.FakeAuthenticationUser();
-            RoomServiceHelper roomServiceHelper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            HelperService helperService = new HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             RoomService roomService =
-                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, roomServiceHelper, _userRepository.Object);
+                new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helperService, _userRepository.Object);
             
             
             var owner = GlobalHelper.GenerateExampleUser();
@@ -312,7 +312,7 @@ namespace UnitTest.Controllers
             var owner = GlobalHelper.GenerateExampleUser();
             var room = GlobalHelper.GenerateRoom();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            HelperService helper = new HelperService(_roomRepository.Object, _userToRoomRepository.Object);
 
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
@@ -348,7 +348,7 @@ namespace UnitTest.Controllers
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
             
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            HelperService helper = new HelperService(_roomRepository.Object, _userToRoomRepository.Object);
             AddUserFromRoom form = new()
             {
                 UserId = user.Id,
@@ -373,7 +373,7 @@ namespace UnitTest.Controllers
             var room = GlobalHelper.GenerateRoom();
             var owner = GlobalHelper.GenerateExampleUser();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            HelperService helper = new HelperService(_roomRepository.Object, _userToRoomRepository.Object);
 
             _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(user, room)).ReturnsAsync(true);
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
@@ -404,7 +404,7 @@ namespace UnitTest.Controllers
             var room = GlobalHelper.GenerateRoom();
             var owner = GlobalHelper.GenerateExampleUser();
             room.Password = BCrypt.Net.BCrypt.HashPassword("test");
-            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            HelperService helper = new HelperService(_roomRepository.Object, _userToRoomRepository.Object);
 
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);

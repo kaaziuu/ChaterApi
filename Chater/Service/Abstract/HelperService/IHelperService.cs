@@ -5,7 +5,7 @@ using Chater.Models;
 
 namespace Chater.Service.Abstract.HelperService
 {
-    public interface IRoomServiceHelper
+    public interface IHelperService
     {
         Task<bool> VerificationDataBeforeUpdate(UpdateRoomForm updateForm, User user);
         bool VerificationPassword(Room room, string password);
@@ -20,6 +20,7 @@ namespace Chater.Service.Abstract.HelperService
 
         Task VerificationDataBeforeRemoveUserToRoomAsync(User user, RemoveUserForm form, Room? room, User userToRemove);
 
+        Task VerificationDataBeforeSendMessage(User user, Room? room);
 
 
     }

@@ -17,22 +17,24 @@ namespace Chater.Service.Concrete
     {
         private readonly IRoomRepository _roomRepository;
         private readonly IUserToRoomRepository _userToRoomRepository;
-        private readonly IRoomServiceHelper _roomServiceHelper;
+        private readonly IHelperService _helperService;
         private readonly IUserRepository _userRepository;
+        
+        
         public RoomService(IRoomRepository roomRepository,
             IUserToRoomRepository userToRoomRepository,
-            IRoomServiceHelper roomServiceHelper,
+            IHelperService helperService,
             IUserRepository userRepository)
         {
             _roomRepository = roomRepository;
             _userToRoomRepository = userToRoomRepository;
-            _roomServiceHelper = roomServiceHelper;
+            _helperService = helperService;
             _userRepository = userRepository;
         }
 
         public async Task<RoomAction> CreateRoomAsync(CreateRoomForm createRoom, User user)
         {
-            if (await _roomServiceHelper.RoomIsExistAsync(createRoom.Name))
+            if (await _helperService.RoomIsExistAsync(createRoom.Name))
             {
                 throw new RoomWithThisNameExist("Room with this name exist");
             }
@@ -53,11 +55,10 @@ namespace Chater.Service.Concrete
 
         }
         
-        
         public async Task<RoomAction> UpdateRoomAsync(UpdateRoomForm updateRoom, User user)
         {
             Room room = await _roomRepository.GetRoomAsync(updateRoom.Id);
-            await _roomServiceHelper.VerificationDataBeforeUpdate(updateRoom, user);
+            await _helperService.VerificationDataBeforeUpdate(updateRoom, user);
             room.Name = updateRoom.NewName;
             await _roomRepository.UpdateRoomAsync(room); 
             
@@ -75,11 +76,10 @@ namespace Chater.Service.Concrete
             await AddUserToRoomAsync(newUser, room, form.Role, form.RoomPassword);
 
         }
-
-
+        
         private async Task AddUserToRoomAsync(User user, Room? room, int role, string password = null)
         {
-            await _roomServiceHelper.VerificationDataBeforeAddUserToRoomAsync(user, room, role, password);
+            await _helperService.VerificationDataBeforeAddUserToRoomAsync(user, room, role, password);
             await CreateUserToRoomAndAddAsync(user.Id, room.Id, role);
         }
 
@@ -87,7 +87,7 @@ namespace Chater.Service.Concrete
         {
             User? userToRemove = await _userRepository.GetUserAsync(form.UserId);
             Room? room = await _roomRepository.GetRoomAsync(roomId);
-            await _roomServiceHelper.VerificationDataBeforeRemoveUserToRoomAsync(user, form, room, userToRemove);
+            await _helperService.VerificationDataBeforeRemoveUserToRoomAsync(user, form, room, userToRemove);
             await _userToRoomRepository.DeleteUserFromRoomAsync(user, room);
         }
 

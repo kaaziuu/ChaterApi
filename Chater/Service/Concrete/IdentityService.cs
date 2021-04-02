@@ -17,12 +17,12 @@ namespace Chater.Service.Concrete
         private readonly IUserRepository _userRepository;
         private string key;
         
+        
         public IdentityService(IUserRepository userRepository, IConfiguration configuration)
         {
             _userRepository = userRepository;
             key = configuration.GetSection("JwtSettings")["secret"];
         }
-
 
         public async Task<string> AuthenticateAsync(string username, string password)
         {

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Chater.Dtos.Message.Form;
+using Chater.Models;
 using Chater.Repository.Abstract;
 using Chater.Service.Abstract;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +22,18 @@ namespace Chater.Controllers
         }
         
         [HttpPost("room/{id}")]
-        public async Task<AcceptedResult> NewMessage(string roomId, NewMessageForm form)
+        public async Task<ActionResult> NewMessage(string roomId, NewMessageForm form)
         {
-            throw new NotImplementedException();
+            try
+            {
+                User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
+                await _messageService.NewMessage(form, user, roomId);
+                return Ok();
+            }
+            catch(System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
         
     }

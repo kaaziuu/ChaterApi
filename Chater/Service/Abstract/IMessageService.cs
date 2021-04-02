@@ -6,6 +6,6 @@ namespace Chater.Repository.Abstract
 {
     public interface IMessageService
     {
-        Task NewMessage(NewMessageForm form, User user);
+        Task NewMessage(NewMessageForm form, User user, string roomId);
     }
 }

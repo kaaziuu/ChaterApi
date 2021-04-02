@@ -6,10 +6,14 @@ using Chater.Dtos.Message.Form;
 using Chater.Models;
 using Chater.Repository.Abstract;
 using Chater.Service.Abstract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chater.Controllers
 {
+    [ApiController]
+    [Authorize]
+    [Route("message")]
     public class MessageController : ControllerBase
     {
         private readonly IMessageService _messageService;
@@ -22,12 +26,12 @@ namespace Chater.Controllers
         }
         
         [HttpPost("room/{id}")]
-        public async Task<ActionResult> NewMessage(string roomId, NewMessageForm form)
+        public async Task<ActionResult> NewMessage(string id, NewMessageForm form)
         {
             try
             {
                 User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
-                await _messageService.NewMessage(form, user, roomId);
+                await _messageService.NewMessage(form, user, id);
                 return Ok();
             }
             catch(System.Exception e)

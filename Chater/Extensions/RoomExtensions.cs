@@ -7,7 +7,7 @@ namespace Chater.Extensions
     {
         public static RoomDto asDto(this Room room) => new RoomDto()
         {
-            Chats = room.Chats,
+            Messages = room.Messages,
             Id = room.Id,
             Name = room.Name,
         };

@@ -40,7 +40,7 @@ namespace Chater.Service.Concrete
             {
                 Name = createRoom.Name,
                 Password = createRoom.Password is null ? null : BCrypt.Net.BCrypt.HashPassword(createRoom.Password),
-                Chats = null
+                Messages = null
             };
             await _roomRepository.CreateRoomAsync(newRoom);
             await AddUserToRoomAsync(user, newRoom, UserToRoom.Administration, createRoom.Password);
@@ -68,7 +68,7 @@ namespace Chater.Service.Concrete
             };
         }
 
-        public async Task GetRoomAndAddUserAsync(AddRemoveUserFromRoom form,  string roomId)
+        public async Task GetRoomAndAddUserAsync(AddUserFromRoom form,  string roomId)
         {
             Room room = await _roomRepository.GetRoomAsync(roomId);
             User newUser = await _userRepository.GetUserAsync(form.UserId);
@@ -83,9 +83,12 @@ namespace Chater.Service.Concrete
             await CreateUserToRoomAndAddAsync(user.Id, room.Id, role);
         }
 
-        public Task RemoveUserFromRoomAsync(User user, Room room, string password = null)
+        public async Task RemoveUserFromRoomAsync(User user, RemoveUserForm form, string roomId)
         {
-            throw new System.NotImplementedException();
+            User? userToRemove = await _userRepository.GetUserAsync(form.UserId);
+            Room? room = await _roomRepository.GetRoomAsync(roomId);
+            await _roomServiceHelper.VerificationDataBeforeRemoveUserToRoomAsync(user, form, room, userToRemove);
+            await _userToRoomRepository.DeleteUserFromRoomAsync(user, room);
         }
 
         private async Task CreateUserToRoomAndAddAsync(string userId, string roomId, int role)

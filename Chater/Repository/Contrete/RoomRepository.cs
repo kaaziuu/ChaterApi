@@ -46,8 +46,5 @@ namespace Chater.Repository.Contrete
             await _collection.DeleteOneAsync(filter);
         }
 
-
-
-
     }
 }

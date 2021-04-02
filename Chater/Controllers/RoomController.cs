@@ -7,6 +7,7 @@ using Chater.Dtos.Room.Form;
 using Chater.Dtos.Room.Response;
 using Chater.Dtos.User.Response;
 using Chater.Exception;
+using Chater.Extensions;
 using Chater.Models;
 using Chater.Service.Abstract;
 using Chater.Settings;
@@ -77,6 +78,8 @@ namespace Chater.Controllers
         public async Task<ActionResult<RoomAction>> UpdateRoomAsync(string id,UpdateRoomForm request)
         {
             User user = await _identityService.GetCurrentUserAsync(this.User.Identity as ClaimsIdentity);
+            Room room = new();
+            room.Id = "cos";
             try
             {
                 request.Id = id;
@@ -105,7 +108,7 @@ namespace Chater.Controllers
         
         [HttpPost]
         [Route("{id}/user")]
-        public async Task<ActionResult> AddUserToRoomAsync(string id, AddRemoveUserFromRoom form)
+        public async Task<ActionResult> AddUserToRoomAsync(string id, AddUserFromRoom form)
         {
             try
             {
@@ -114,13 +117,13 @@ namespace Chater.Controllers
             }
             catch (System.Exception e)
             {
-                return Problem(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
         [HttpDelete]
         [Route("{id}/user")]
-        public async Task<ActionResult> RemoveUserFromRoomAsync(string id, AddRemoveUserFromRoom form)
+        public async Task<ActionResult> RemoveUserFromRoomAsync(string id, AddUserFromRoom form)
         {
             throw new System.NotImplementedException();
         }

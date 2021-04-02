@@ -320,7 +320,7 @@ namespace UnitTest.Controllers
             
             RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper, _userRepository.Object);
             bool isCatch = false;
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "123",
@@ -332,7 +332,7 @@ namespace UnitTest.Controllers
             var result = await controller.AddUserToRoomAsync(It.IsAny<string>(), form);
             
             // Assert
-            result.Should().BeOfType<ObjectResult>();
+            result.Should().BeOfType<BadRequestObjectResult>();
 
 
         }
@@ -349,7 +349,7 @@ namespace UnitTest.Controllers
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
             
             RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "test",
@@ -362,7 +362,7 @@ namespace UnitTest.Controllers
             var result = await controller.AddUserToRoomAsync(It.IsAny<string>(), form);
             
             // Assert
-            result.Should().BeOfType<ObjectResult>();
+            result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         [Fact]
@@ -379,7 +379,7 @@ namespace UnitTest.Controllers
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
 
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "test"
@@ -393,7 +393,7 @@ namespace UnitTest.Controllers
             var result = await controller.AddUserToRoomAsync(It.IsAny<string>(), form);
 
             // Assert
-            result.Should().BeOfType<ObjectResult>();
+            result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         [Fact]
@@ -409,11 +409,10 @@ namespace UnitTest.Controllers
             _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
 
-
             RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
                 _userRepository.Object);
 
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "test"

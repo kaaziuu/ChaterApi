@@ -32,7 +32,7 @@ namespace Chater.Service.Concrete.HelperService
             return true;
         }
 
-        public bool PasswordVerification(Room room, string password)
+        public bool VerificationPassword(Room room, string password)
         {
             if (BCrypt.Net.BCrypt.Verify(password, room.Password))
                 return true;
@@ -42,7 +42,7 @@ namespace Chater.Service.Concrete.HelperService
         public async Task<bool> PasswordVerificationByRoomNameAsync(string roomName, string password)
         {
             var room = await _roomRepository.GetRoomByNameAsync(roomName);
-            if (PasswordVerification(room, password))
+            if (VerificationPassword(room, password))
                 return true;
             return false;
         }
@@ -66,11 +66,35 @@ namespace Chater.Service.Concrete.HelperService
         public async Task VerificationDataBeforeAddUserToRoomAsync(User user, Room? room, int role,
             string password = null)
         {
+            VerificationRoomExisting(room);
+            VerificationPassword(room, password);
+            VerificationRole(role);
+            await VerificationUserIsInRoomAsync(user, room);
+        }
+
+        private async Task VerificationUserIsInRoomAsync(User user, Room room)
+        {
+            if (await _userToRoomRepository.UserIsOnRoomAsync(user, room))
+            {
+                throw new System.Exception("User in in room");
+            }
+        }
+        
+        public async Task VerificationDataBeforeRemoveUserToRoomAsync(User user, RemoveUserForm form, Room? room, User userToRemove)
+        {
             if (room is null)
                 throw new RoomDoesntExistExceptionException("room doesnt exist");
-            PasswordVerification(room, password);
-            VerificationRole(role);
-            await VerificationUserIsInRoom(user, room);
+            await VerificationUserIsNotInRoomAsync(userToRemove, room);
+            await VerificationRolesAsync(room, user, UserToRoom.Administration);
+            VerificationPassword(room, form.Password);
+        }
+
+        private async Task VerificationUserIsNotInRoomAsync(User user, Room room)
+        {
+            if (!(await _userToRoomRepository.UserIsOnRoomAsync(user, room)))
+            {
+                throw new System.Exception("User is not in room");
+            }
         }
 
         private void VerificationRole(int role)
@@ -82,17 +106,11 @@ namespace Chater.Service.Concrete.HelperService
             }
         }
 
-        private async Task VerificationUserIsInRoom(User user, Room room)
-        {
-            if (await _userToRoomRepository.UserIsOnRoomAsync(user, room))
-            {
-                throw new System.Exception("User in in room");
-            }
-        }
+
 
         private void VerificationRoomExisting(Room room)
         {
-            if (room != null)
+            if (room == null)
             {
                 throw new RoomDoesntExistExceptionException("");
             }

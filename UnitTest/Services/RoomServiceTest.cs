@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Chater.Dtos.Room;
 using Chater.Dtos.Room.Form;
+using Chater.Dtos.Room.Response;
 using Chater.Exception;
 using Chater.Models;
 using Chater.Repository.Abstract;
@@ -191,25 +195,18 @@ namespace UnitTest.Services
             
             RoomService service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper, _userRepository.Object);
             bool isCatch = false;
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "123"
             };
             
             // Act
-            try
-            {
-                await service.GetRoomAndAddUserAsync(form,  It.IsAny<string>());
-            }
-            catch (InvalidPasswordException e)
-            {
-                // Assert
-                isCatch = true;
-                e.Message.Should().BeSameAs("Invalid password");
-            }
+            
+            Func<Task> action = async () => await service.GetRoomAndAddUserAsync(form,  It.IsAny<string>());
 
-            isCatch.Should().BeTrue("service have to throw InvalidPasswordException");
+            // Assert
+            action.Should().ThrowAsync<InvalidPasswordException>();
 
         }
 
@@ -226,27 +223,18 @@ namespace UnitTest.Services
             _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
             
             RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "test",
                 Role = 5
             };
             RoomService service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper, _userRepository.Object);
-            bool isCatch = false;
-            // Act
-            try
-            {
-                await service.GetRoomAndAddUserAsync(form,  It.IsAny<string>());
-            }
-            catch (Exception e)
-            {
-                // Assert
-                isCatch = true;
-                e.Message.Should().BeSameAs("Invalid Role");
-            }
-
-            isCatch.Should().BeTrue("service have to throw InvalidPasswordException");
+         
+            // Act 
+            Func<Task> action = async () => await service.GetRoomAndAddUserAsync(form,  It.IsAny<string>());
+            // Assert
+            action.Should().ThrowAsync<InvalidRoleException>();
 
         }
 
@@ -267,7 +255,7 @@ namespace UnitTest.Services
             RoomService service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper, _userRepository.Object);
             bool isCatch = false;
             
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "test"
@@ -307,29 +295,184 @@ namespace UnitTest.Services
             
             RoomService service = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper, _userRepository.Object);
             
-            AddRemoveUserFromRoom form = new()
+            AddUserFromRoom form = new()
             {
                 UserId = user.Id,
                 RoomPassword = "test"
             };
-            bool isCatch = false;
             // Act
-            try
-            {
-                await service.GetRoomAndAddUserAsync(form,  It.IsAny<string>());
-            }
-            catch (Exception e)
-            {
-                // Assert
-                isCatch = true;
-            }
 
-            isCatch.Should().BeFalse("service shouldn't throw any exception");
+            Func<Task> action = async () => await service.GetRoomAndAddUserAsync(form, It.IsAny<string>());
+            // Assert 
+        }
+
+        [Fact]
+        public async Task RemoveUserFromRoom_UserIsNotInRoom_ThrowExceptions()
+        {
+            // Arrange
+            var form = new RemoveUserForm()
+            {
+                Password = "test",
+                UserId = It.IsAny<string>()
+            };
+            var owner = GlobalHelper.GenerateExampleUser();
+            var user = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
+            var utr = GlobalHelper.AssignUserToRoom(user, room, UserToRoom.Administration);
+            
+            _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(false);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(utr);
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+            
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
+                _userRepository.Object);
+            // act
+
+            Func<Task> action =  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
+            // assert
+
+            action.Should().Throw<Exception>();
+        }
+
+        [Fact]
+        public async Task RemoveUserFromRoom_InvalidPassword_ThrowExceptions()
+        {
+            ICollection<int> tmp = new List<int>(){1, 2, 3, 4};
+            // Arrange
+            var form = new RemoveUserForm()
+            {
+                Password = "test",
+                UserId = It.IsAny<string>()
+            };
+            var owner = GlobalHelper.GenerateExampleUser();
+            var user = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            var utr = GlobalHelper.AssignUserToRoom(user, room, UserToRoom.Administration);
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test12");
+
+            _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(true);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(utr);
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+
+            
+            
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
+                _userRepository.Object);
+            // act
+            Func<Task> action = async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
+            
+            // Assert
+            await action.Should().ThrowAsync<InvalidPasswordException>().WithMessage("Invalid Password");
+
+
+        }
+        [Fact]
+        public async Task RemoveUserFromRoom_InvalidRole_ThrowExceptions()
+        {
+            // Arrange
+            var form = new RemoveUserForm()
+            {
+                Password = "test",
+                UserId = It.IsAny<string>()
+            };
+            var owner = GlobalHelper.GenerateExampleUser();
+            var user = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            var utr = GlobalHelper.AssignUserToRoom(user, room, UserToRoom.SimpleUser);
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
+
+            _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(true);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(utr);
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+
+            
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
+                _userRepository.Object);
+            // act
+            Func<Task> action =  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
+            // Assert
+            action.Should().Throw<InvalidRoleException>().WithMessage("Invalid Role");
+
+
+        }
+
+        [Fact]
+        public async Task RemoveUserFromRoom_RomeDoesnExist_ThrowExceptions()
+        {
+            // Arrange
+            var form = new RemoveUserForm()
+            {
+                Password = "test",
+                UserId = It.IsAny<string>()
+            };
+            var owner = GlobalHelper.GenerateExampleUser();
+            var user = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            var utr = GlobalHelper.AssignUserToRoom(user, room, UserToRoom.Administration);
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
+
+            _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(false);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync((Room)null);
+            _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(utr);
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+
+            
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
+                _userRepository.Object);
+            // act
+            Func<Task> action =  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
+            // Assert
+            action.Should().Throw<RoomDoesntExistExceptionException>().WithMessage("Room doesnt exist");
 
         }
         
-        
-        
+        [Fact]
+        public async Task RemoveUserFromRoom_ValidData_EndWithoutError()
+        {
+            // Arrange
+            var form = new RemoveUserForm()
+            {
+                Password = "test",
+                UserId = It.IsAny<string>()
+            };
+            var owner = GlobalHelper.GenerateExampleUser();
+            var user = GlobalHelper.GenerateExampleUser();
+            var room = GlobalHelper.GenerateRoom();
+            var utr = GlobalHelper.AssignUserToRoom(user, room, UserToRoom.Administration);
+            room.Password = BCrypt.Net.BCrypt.HashPassword("test");
 
+            _userToRoomRepository.Setup(repo => repo.UserIsOnRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(true);
+            _roomRepository.Setup(repo => repo.GetRoomAsync(It.IsAny<string>())).ReturnsAsync(room);
+            _userToRoomRepository.Setup(repo => repo.GetUserToRoomAsync(It.IsAny<User>(), It.IsAny<Room>()))
+                .ReturnsAsync(utr);
+            _userRepository.Setup(repo => repo.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+
+            
+            RoomServiceHelper helper = new RoomServiceHelper(_roomRepository.Object, _userToRoomRepository.Object);
+            RoomService roomService = new RoomService(_roomRepository.Object, _userToRoomRepository.Object, helper,
+                _userRepository.Object);
+            // act
+            Func<Task> action=  async () => await roomService.RemoveUserFromRoomAsync(owner, form, It.IsAny<string>());
+            // Assert
+            action.Should().NotThrow();
+        }
     }
 }

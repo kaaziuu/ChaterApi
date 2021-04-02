@@ -2,12 +2,11 @@
 
 namespace Chater.Dtos.Room.Form
 {
-    public class AddRemoveUserFromRoom
+    public class AddUserFromRoom
     {
         [Required]
         public string UserId { get; set; }
         public string RoomPassword { get; set; }
-        [Required]
         public int Role { get; set; }
     }
 }

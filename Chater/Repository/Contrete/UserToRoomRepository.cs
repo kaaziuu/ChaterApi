@@ -6,7 +6,7 @@ using MongoDB.Driver;
 
 namespace Chater.Repository.Contrete
 {
-    public class UserToRoomRepository : BaseRepository,IUserToRoomRepository
+    public class UserToRoomRepository : BaseRepository, IUserToRoomRepository
     {
         private readonly IMongoCollection<UserToRoom> _collection;
         private readonly FilterDefinitionBuilder<UserToRoom> _filterDefinitionBuilder = Builders<UserToRoom>.Filter;
@@ -15,26 +15,29 @@ namespace Chater.Repository.Contrete
         {
             _collection = Database.GetCollection<UserToRoom>(nameof(UserToRoom));
         }
-        
+
         public async Task<ICollection<UserToRoom>> GetUserRoomAsync(User user)
         {
             var filter = _filterDefinitionBuilder.Eq(utr => utr.User, user.Id);
             return await _collection.Find(filter).ToListAsync();
-
         }
 
         public async Task<bool> UserIsOnRoomAsync(User user, Room room)
         {
-            var filter = _filterDefinitionBuilder.Where(repo => repo.Room == room.Id && repo.User == user.Id);
+            var filter = _filterDefinitionBuilder
+                .Where(repo => repo.Room == room.Id && repo.User == user.Id);
             var result = await _collection.Find(filter).FirstOrDefaultAsync();
             if (result is not null)
                 return true;
             return false;
         }
 
-        public Task DeleteUserFromRoomAsync(User user, Room room)
+        public async Task DeleteUserFromRoomAsync(User user, Room room)
         {
-            throw new System.NotImplementedException();
+            var filet = _filterDefinitionBuilder
+                .Where(repo => repo.Room == room.Id && repo.User == user.Id);
+            _collection.DeleteOneAsync(filet);
+
         }
 
         public async Task AddUserToRoomAsync(UserToRoom userToRoom)
@@ -45,8 +48,7 @@ namespace Chater.Repository.Contrete
         public async Task<UserToRoom> GetUserToRoomAsync(User user, Room room)
         {
             var filter = _filterDefinitionBuilder.Where(repo => repo.Room == room.Id && repo.User == user.Id);
-            return  await _collection.Find(filter).FirstOrDefaultAsync();
-
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
     }
 }

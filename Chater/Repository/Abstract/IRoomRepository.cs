@@ -18,6 +18,7 @@ namespace Chater.Repository.Abstract
         Task DeleteRoomAsync(Room room);
 
 
-        
+
+
     }
 }

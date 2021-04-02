@@ -28,7 +28,7 @@ namespace UnitTest.Services.HelperService
             // Act
             try
             {
-                var result = service.PasswordVerification(room, "123");
+                var result = service.VerificationPassword(room, "123");
             }
             catch(InvalidPasswordException e)
             {
@@ -50,7 +50,7 @@ namespace UnitTest.Services.HelperService
             var service = new RoomServiceHelper(_roomRepository.Object, _userToRoomService.Object);
             
             // Act
-            var result = service.PasswordVerification(room, "test");
+            var result = service.VerificationPassword(room, "test");
             // Assert
             result.Should().Equals(true);
         }

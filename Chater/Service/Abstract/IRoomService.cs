@@ -14,9 +14,9 @@ namespace Chater.Service.Abstract
 
         Task<RoomAction> UpdateRoomAsync(UpdateRoomForm updateRoom, User user);
 
-        Task GetRoomAndAddUserAsync(AddRemoveUserFromRoom form, string roomId);
+        Task GetRoomAndAddUserAsync(AddUserFromRoom form, string roomId);
 
-        Task RemoveUserFromRoomAsync(User user, Room room, string password = null);
+        Task RemoveUserFromRoomAsync(User user, RemoveUserForm form, string RoomId);
         
         
     }

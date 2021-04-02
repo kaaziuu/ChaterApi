@@ -23,15 +23,15 @@ namespace Chater.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IIdentityService _identityService;
-        
-        
-         public UserController(IUserRepository userRepository, IIdentityService identityService)
+
+
+        public UserController(IUserRepository userRepository, IIdentityService identityService)
         {
             _userRepository = userRepository;
             _identityService = identityService;
         }
 
-        
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<AuthDto>> CreateUserAsync(CreateUserDto request)
@@ -40,6 +40,7 @@ namespace Chater.Controllers
             {
                 return BadRequest();
             }
+
             var newUser = new User()
             {
                 Username = request.Username,
@@ -49,12 +50,11 @@ namespace Chater.Controllers
             };
 
             await _userRepository.CreateUserAsync(newUser);
-            
+
             return new AuthDto()
             {
-                Token =  await _identityService.AuthenticateAsync(request.Username, request.Password)
+                Token = await _identityService.AuthenticateAsync(request.Username, request.Password)
             };
-            
         }
 
         [AllowAnonymous]
@@ -69,9 +69,5 @@ namespace Chater.Controllers
                 Token = token
             };
         }
-        
-        
-        
     }
-
 }

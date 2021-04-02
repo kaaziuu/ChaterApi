@@ -8,7 +8,7 @@ namespace Chater.Service.Abstract.HelperService
     public interface IRoomServiceHelper
     {
         Task<bool> VerificationDataBeforeUpdate(UpdateRoomForm updateForm, User user);
-        bool PasswordVerification(Room room, string password);
+        bool VerificationPassword(Room room, string password);
 
         Task<bool> PasswordVerificationByRoomNameAsync(string roomName, string password);
 
@@ -17,6 +17,8 @@ namespace Chater.Service.Abstract.HelperService
         Task<int?> GetUserRoleInRoomAsync(Room room, User user);
 
         Task VerificationDataBeforeAddUserToRoomAsync(User user, Room room, int role, string password = null);
+
+        Task VerificationDataBeforeRemoveUserToRoomAsync(User user, RemoveUserForm form, Room? room, User userToRemove);
 
 
 
